@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { User } from "../models/user.model.js"
-import {uploadonCloudinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
 const registerUser = asyncHandler(async(req,res)=>{
 
 
@@ -21,7 +21,7 @@ if(
     
 
 }
-const existedUser = User.findOne({
+const existedUser =await User.findOne({
     $or: [{userName,email}]
 }
 
@@ -37,8 +37,8 @@ const coverImageLocalpath= req.files?.coverImage[0]?.path  // multer path
 if(!avatarLocalpath){
     throw new ApiError(409,"AVATAR NOT FOUND ")
 }
-const avatar = await uploadonCloudinary(avatarLocalpath)
-const coverImage = await uploadonCloudinary(coverImageLocalpath)
+const avatar = await uploadOnCloudinary(avatarLocalpath)
+const coverImage = await uploadOnCloudinary(coverImageLocalpath)
 if(!avatar){
     throw new ApiError(409,"avatar not found ")
 }
@@ -60,7 +60,7 @@ const user= await User.create(
     }
 )
 
-const createdUser= User.findById(user._id).select(
+const createdUser= await User.findById(user._id).select(
     "-password -refreshToken"
 )
 
