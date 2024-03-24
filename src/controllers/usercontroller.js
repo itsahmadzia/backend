@@ -6,9 +6,11 @@ import { User } from "../models/user.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 const generateAccessandRefreshTokens = async(userId)=>{
     try {
-     const user=    User.findById(userId)
-   const refreshToken =  user.generateRefreshToken();
-   const accessToken =   user.generateAccessToken();
+        console.log(userId)
+     const user=   await User.findById(userId)
+     console.log("found the user", user)
+   const refreshToken = await user.generateRefreshToken();
+   const accessToken = await  user.generateAccessToken();
    user.refreshToken=refreshToken;
   await user.save({validateBeforeSave:false});
 
@@ -102,22 +104,23 @@ const loginUser=asyncHandler(async(req,res)=>{
         throw new ApiError(404,"EMAIL/USERNAME REQUIRED");
         console.log("die")
     }
+    console.log(userName,typeof(userName));
     //now check for username or email 
-    const user=await User.find({$or: [userName,email]});
+    const user=await User.findOne({$or: [{userName},{email}]});
     if(!user){
         throw new ApiError(404,"USER not Found ");
         console.log("die")
     }
     /// we have a method userschma.methods.isPasswordCorrect it is accessable by user not User as user is an instance and User is made by mongoose 
+console.log(user);
 
-
-    const isPasswordValid = await user.isPasswordCorrect(password)
+    const isPasswordValid = await user.isPasswordCorrect(password);
     if(!isPasswordValid){
         throw new ApiError(404,"Incorrect Password ");
         console.log("die")
     }
     const {accessToken,refreshToken} = await generateAccessandRefreshTokens(user._id);
-
+console.log(accessToken,"    TTTT     ",refreshToken)
     const loggedinUser= await User.findById(user._id).select(
         "-refreshToken -password"
     )
@@ -159,7 +162,7 @@ await User.findByIdAndUpdate(req.user._id,
         secure: true
     }
 
-    return res.status(200).clearCookie(accessToken,options).clearCookie(refreshToken,options).json(
+    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(
         new ApiResponse(200,{},"User logged out")
     )
 

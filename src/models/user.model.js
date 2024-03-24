@@ -58,23 +58,24 @@ next();
  
 
 })
-userSchema.methods.isPasswordCorrect =async function(pass){
+
+userSchema.methods.isPasswordCorrect = async function(pass){
    return await (bcrypt.compare(pass,this.password))
 }
 
-userSchema.methods.generateRefreshToken= function(){
-      jwt.sign(
-            {
-                  _id: this._id,
-              
-            }
-            ,
-            process.env.REFRESH_TOKEN_SECRET ,
-            {
-                  expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-            }
-         )
-}
+userSchema.methods.generateRefreshToken = function() {
+      const refreshToken = jwt.sign(
+          {
+              _id: this._id
+          },
+          process.env.REFRESH_TOKEN_SECRET,
+          {
+              expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+          }
+      );
+  
+      return refreshToken;
+  }
 
 userSchema.methods.generateAccessToken= function(){
    return jwt.sign(
